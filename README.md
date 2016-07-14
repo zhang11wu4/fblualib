@@ -1,5 +1,7 @@
 # fblualib: A collection of Lua / Torch utilities
 
+**Tweak to make things work for 16.04**
+
 FBLuaLib is a collection of Lua / Torch utilities developed at Facebook that
 we've found useful. Some of these utilities are useful without Torch.
 
