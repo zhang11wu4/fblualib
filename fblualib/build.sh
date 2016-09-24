@@ -30,5 +30,5 @@ version='0.1-1'
 for rock in $rocks; do
   cd $root/$rock
   # first attempt to install without root. if failed, install with root
-  sudo luarocks make rockspec/fb$rock-$version.rockspec || sudo luarocks make rockspec/fb$rock-$version.rockspec
+  luarocks make rockspec/fb$rock-$version.rockspec || luarocks make rockspec/fb$rock-$version.rockspec
 done
