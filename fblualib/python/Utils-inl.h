@@ -12,26 +12,20 @@
 #error This file may only be included from Utils.h
 #endif
 
-#include <boost/format.hpp>
+#include <folly/Conv.h>
 
 namespace fblualib {
 namespace python {
 
 namespace detail {
 
-inline std::string format() { return ""; }
-
-inline boost::format& format_helper(boost::format& msg) { return msg; }
-
-template <typename H, typename... Tail>
-boost::format& format_helper(boost::format& msg, H&& val, Tail&&... args) {
-  return format_helper(msg % std::forward<H>(val), std::forward<Tail>(args)...);
+inline std::string format() {
+  return "";
 }
 
-template <typename... Args>
-std::string format(std::string fmt, Args&&... args) {
-  boost::format msg(fmt);
-  return format_helper(msg, std::forward<Args>(args)...).str();
+template <class... Args>
+std::string format(folly::StringPiece fmt, Args&&... args) {
+  return folly::format(fmt, std::forward<Args>(args)...).str();
 }
 }  // namespace detail
 

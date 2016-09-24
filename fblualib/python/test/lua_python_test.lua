@@ -19,7 +19,6 @@ local util = require('fb.util')
 function testFundamental()
     assertEquals(true, py.eval('True'))
     assertEquals(false, py.eval('False'))
-
     assertEquals(true, py.eval('a', {a=true}))
     assertEquals(false, py.eval('a', {a=false}))
     assertEquals(nil, py.eval('None'))
@@ -34,17 +33,6 @@ function testFundamental()
     assertEquals('hello', py.eval('a', {a='hello'}))
     assertEquals(true, py.eval('isinstance(a, float)', {a=42}))
     assertEquals(true, py.eval('isinstance(a, bytes)', {a='hello'}))
-
-    -- Eval none
-    assertEquals('hello', py.eval('a', {a='hello'}))
-    assertEquals({a=2,b=py.None}, py.eval_none('{"a": 2, "b": None}'))
-    assertEquals(
-        {a=2,b={c=py.None}},
-        py.eval_none('{"a": 2, "b": {"c": None}}'))
-    -- Round tripping
-    assertEquals(
-        {a=2,b={c=py.None}},
-        py.eval_none('a', {a=py.eval_none('{"a": 2, "b": {"c": None}}')}))
 end
 
 function testSequence()
@@ -250,7 +238,7 @@ d = {'a': 'foo', 'b': 'bar'}
     local get_args = py.reval('get_args')
     local l = py.reval('l')
     local d = py.reval('d')
-    assertEquals({[0]=1, [1]=2, [2]=3, [3]=4, a="foo", b="bar"},
+    assertEquals({[0]=1, [1]=2, [2]=3, [3]=4, a=foo, b=bar},
                  py.eval(get_args(1, 2, py.args, l, py.kwargs, d)))
 end
 

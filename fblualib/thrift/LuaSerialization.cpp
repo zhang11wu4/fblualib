@@ -77,7 +77,8 @@ int serializeToString(lua_State* L) {
   uint64_t chunkSize =
     luaChunkSize ? *luaChunkSize : std::numeric_limits<uint64_t>::max();
 
-  auto obj = Serializer::toThrift(L, 1, 3);
+  Serializer serializer;
+  auto obj = serializer.toThrift(L, 1, 3);
 
   StringWriter writer;
   encode(obj, codecType, getVersion(L), writer, kAnyVersion, chunkSize);
@@ -98,7 +99,8 @@ int serializeToFile(lua_State* L) {
 
   auto fp = luaDecodeFILE(L, 2);
 
-  auto obj = Serializer::toThrift(L, 1, 4);
+  Serializer serializer;
+  auto obj = serializer.toThrift(L, 1, 4);
 
   FILEWriter writer(fp);
   encode(obj, codecType, getVersion(L),  writer, kAnyVersion, chunkSize);
@@ -109,16 +111,16 @@ int serializeToFile(lua_State* L) {
 int doDeserialize(lua_State* L, DecodedObject&& decodedObject, int envIdx) {
   auto version = getVersion(L);
 
-  Deserializer::Options options;
+  unsigned int options = 0;
   // Check for bytecode version compatibility
   auto& decodedBytecodeVersion = decodedObject.luaVersionInfo.bytecodeVersion;
   if (decodedBytecodeVersion.empty() ||
       decodedBytecodeVersion != version.bytecodeVersion) {
-    options.allowBytecode = false;
+    options |= Deserializer::NO_BYTECODE;
   }
 
-  return Deserializer::fromThrift(L, std::move(decodedObject.output),
-                                  envIdx, std::move(options));
+  return Deserializer(options).fromThrift(L, std::move(decodedObject.output),
+                                          envIdx);
 }
 
 int deserializeFromString(lua_State* L) {

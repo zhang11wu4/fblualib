@@ -24,7 +24,7 @@ namespace fblualib { namespace thrift {
 namespace {
 
 constexpr uint32_t kMagic = 0x5441554c;  // "LUAT", little-endian
-constexpr int kMaxSupportedVersion = 4;
+constexpr int kMaxSupportedVersion = 3;
 
 FOLLY_PACK_PUSH
 struct Header {
@@ -33,13 +33,6 @@ struct Header {
   uint32_t thriftHeaderLength;  // length of Thrift header
 } FOLLY_PACK_ATTR;
 FOLLY_PACK_POP
-
-// Bumps the high water mark to be at least v; returns true if we've
-// reached the max version
-bool bumpVersion(int& hwm, int v) {
-  if (v > hwm) hwm = v;
-  return v == kMaxSupportedVersion;
-}
 
 }  // namespace
 
@@ -59,38 +52,26 @@ void encode(const LuaObject& input, folly::io::CodecType codecType,
   }
 
   int version = 0;
-  bool versionDone = false;
 
   if (dataQueue.chainLength() > chunkLength) {
     needChunking = true;
     // Version 2: chunking
-    versionDone = bumpVersion(version, 2);
+    version = 2;
   }
 
-  if (!versionDone) {
-    for (auto& ref : input.refs) {
-      if (ref.__isset.customUserDataVal) {
-        // Version 4: custom userdata
-        if (bumpVersion(version, 4)) {
-          break;  // reached max
-        }
-      }
-      if (ref.__isset.envLocation) {
-        // Version 3: external env / package references
-        if (bumpVersion(version, 3)) {
-          break;
-        }
-      }
-      if (version < 1 && ref.__isset.tableVal) {
-        auto& table = ref.tableVal;
-        if (table.__isset.specialKey ||
-            table.__isset.specialValue ||
-            table.__isset.metatable) {
-          // Version 1: specials, metatables
-          if (bumpVersion(version, 1)) {
-            break;
-          }
-        }
+  for (auto& ref : input.refs) {
+    if (ref.__isset.envLocation) {
+      // Version 3: external env / package references
+      version = 3;
+      break;
+    }
+    if (version < 1 && ref.__isset.tableVal) {
+      auto& table = ref.tableVal;
+      if (table.__isset.specialKey ||
+          table.__isset.specialValue ||
+          table.__isset.metatable) {
+        // Version 1: specials, metatables
+        version = 1;
       }
     }
   }

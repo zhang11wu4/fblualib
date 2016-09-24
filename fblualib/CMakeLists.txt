@@ -7,7 +7,7 @@
 #
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
-SET(Torch_DIR "/home/baci/torch/install/share/cmake/torch")
+
 # Torch messes this up
 SET(SAVED_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 

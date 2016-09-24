@@ -10,8 +10,6 @@
 
 #include "Ref.h"
 
-#include <glog/logging.h>
-
 #include "LuaToPython.h"
 
 namespace fblualib {
@@ -80,7 +78,7 @@ std::pair<PyObjectHandle, bool> getKey(lua_State* L, int index) {
   case LUA_TNUMBER:
     {
       double val = lua_tonumber(L, index);
-      long lval = (long)val;
+      long lval = folly::to<long>(val);
       p.first.reset(PyInt_FromLong(lval));
       p.second = false;
     }
@@ -209,7 +207,7 @@ int refCall(lua_State* L) {
 
     for (int i = 1; i <= nreg; ++i, ++n) {
       auto arg = converter.convert(L, firstArg + i - 1);
-      checkPythonError(arg, L, "opaque ref: call: arg %d", i);
+      checkPythonError(arg, L, "opaque ref: call: arg {}", i);
       PyTuple_SET_ITEM(args.get(), n, arg.release());  // steals arg
     }
 
@@ -218,7 +216,7 @@ int refCall(lua_State* L) {
         PyObjectHandle arg(
             PyObjectHandle::INCREF,
             PySequence_Fast_GET_ITEM(varargs.get(), i - 1));  // borrowed
-        checkPythonError(arg, L, "opaque ref: varg %d", i);
+        checkPythonError(arg, L, "opaque ref: varg {}", i);
         PyTuple_SET_ITEM(args.get(), n, arg.release());  // steals arg
       }
     }

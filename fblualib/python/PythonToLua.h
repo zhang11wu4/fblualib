@@ -11,7 +11,6 @@
 #ifndef FBLUA_PYTHON_PYTHONTOLUA_H_
 #define FBLUA_PYTHON_PYTHONTOLUA_H_
 
-#include <unordered_map>
 #include "Utils.h"
 
 namespace fblualib {
@@ -19,12 +18,6 @@ namespace python {
 
 class PythonToLuaConverter {
  public:
-  enum NoneMode {
-    NONE_AS_LUA_NIL,
-    NONE_AS_LUAPY_NONE,
-  };
-  explicit PythonToLuaConverter(NoneMode noneMode): noneMode_(noneMode) {}
-
   int convert(lua_State* L, const PyObjectHandle& obj);
 
  private:
@@ -36,7 +29,6 @@ class PythonToLuaConverter {
   int convertedCount_ = 0;
   // Map from Python object into index in convertedIdx_
   std::unordered_map<PyObjectHandle, int> converted_;
-  NoneMode noneMode_ = NONE_AS_LUA_NIL;
 };
 
 int initPythonToLua(lua_State* L);

@@ -10,35 +10,20 @@
 
 #include "PythonToLua.h"
 #include "NumpyArrayAllocator.h"
-#include "Ref.h"
 
 namespace fblualib {
 namespace python {
 
 namespace {
 
-template <class T>
-void luaPushTensor(lua_State* L, thpp::TensorPtr<thpp::Tensor<T>> tensor) {
-  luaT_pushudata(L, tensor.moveAsTH(), thpp::Tensor<T>::kLuaTypeName);
-}
-template <class T>
-void luaPushTensor(lua_State* L, const thpp::Tensor<T>& tensor) {
-  luaPushTensor<T>(L, tensor.copyPtr());
-}
-
-THAllocator numpyArrayTHAllocator = {
-  &thpp::THAllocatorWrapper<NumpyArrayAllocator>::malloc,
-  &thpp::THAllocatorWrapper<NumpyArrayAllocator>::realloc,
-  &thpp::THAllocatorWrapper<NumpyArrayAllocator>::free,
-};
 // Push a tensor, assuming arr is a numpy array of appropriate type
 template <class T>
 void pushTensor(lua_State* L, const PyObjectHandle& oh) {
   auto arr = reinterpret_cast<PyArrayObject*>(oh.get());
   auto storage = thpp::Storage<T>::wrapWithAllocator(
-      static_cast<T*>(PyArray_DATA(arr)),
-      PyArray_NBYTES(arr) / sizeof(T),
-      &numpyArrayTHAllocator,
+      folly::Range<T*>(static_cast<T*>(PyArray_DATA(arr)),
+                       PyArray_NBYTES(arr) / sizeof(T)),
+      &thpp::THAllocatorWrapper<NumpyArrayAllocator>::thAllocator,
       new NumpyArrayAllocator(oh));
 
   // Numpy and Torch disagree on empty tensors. In Torch, an empty
@@ -113,14 +98,7 @@ int PythonToLuaConverter::doConvert(lua_State* L, const PyObjectHandle& oh) {
   // protocol and fail at runtime if you try to convert them to float...)
 
   if (obj == Py_None) {                          // None
-    switch(noneMode_) {
-    case NONE_AS_LUA_NIL:
-      lua_pushnil(L);
-      break;
-    case NONE_AS_LUAPY_NONE:
-      pushOpaqueRef(L, PyObjectHandle(PyObjectHandle::INCREF, Py_None));
-      break;
-    }
+    lua_pushnil(L);
   } else if (PyBool_Check(obj)) {                // bool
     lua_pushboolean(L, obj != Py_False);
   } else if (PyInt_Check(obj)) {                 // int
@@ -208,9 +186,9 @@ int PythonToLuaConverter::doConvert(lua_State* L, const PyObjectHandle& oh) {
     switch (PyArray_TYPE(arrObj)) {
     NDARRAY_TO_TENSOR(double, NPY_DOUBLE);
     NDARRAY_TO_TENSOR(float, NPY_FLOAT);
-    NDARRAY_TO_TENSOR(int, NPY_INT32);
-    NDARRAY_TO_TENSOR(long, NPY_INT64);
-    NDARRAY_TO_TENSOR(unsigned char, NPY_UINT8);
+    NDARRAY_TO_TENSOR(int32_t, NPY_INT32);
+    NDARRAY_TO_TENSOR(int64_t, NPY_INT64);
+    NDARRAY_TO_TENSOR(uint8_t, NPY_UINT8);
     default:
       luaL_error(L, "Invalid numpy data type %d", PyArray_TYPE(arrObj));
     }

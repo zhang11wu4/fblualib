@@ -68,19 +68,4 @@ function testLuaObject()
     check_tensor(t)
 end
 
-function testTableIteration()
-    local t = {
-        [1] = 10,
-        [2] = 20,
-        [3] = 30,
-        [true] = 40,
-        [false] = 50,
-        hello = 60,
-        world = 70,
-        [100] = 80,
-        [200] = 90,
-    }
-    lib.check_table_iteration(thrift.to_string(t))
-end
-
 LuaUnit:main()

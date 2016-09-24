@@ -5,21 +5,6 @@ on-the-fly conversion (with good defaults) of most data types back and forth.
 This allows, for example, to use `numpy`, `scipy`, or `matplotlib` directly
 with Torch tensors.
 
-## Installation
-
-Dependencies:
-
-* glog
-* boost
-* python2.7 (Manually edit the CMake for older versions, 3+ is not supported)
-* [thpp](https://github.com/facebook/thpp/) (If you don't have folly or thrift,
-you can still build thpp with `THPP_NOFB=1 ./build.sh`, and fbpython should
-still work)
-
-```
-luarocks make rockspec/*
-```
-
 ## Usage
 
 Throughout this document, we'll refer to this module as `py`:
@@ -44,7 +29,7 @@ def foo(x):
   return x + 1
 ]=])
 
-print(py.eval('foo(a) + 10', {a = 42}))  -- prints 53
+print(py.eval('foo(a) + 10', {a = 42})) -- prints 53
 ```
 
 There are a few things to note in the example above:

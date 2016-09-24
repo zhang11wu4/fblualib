@@ -39,7 +39,7 @@ namespace cpp2 fblualib.thrift
 include "thpp/if/Tensor.thrift"
 include "fblualib/thrift/if/ChunkedCompression.thrift"
 
-typedef binary (cpp2.type = "folly::IOBuf") IOBuf
+typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
 
 struct LuaPrimitiveObject {
   1: bool isNil,
@@ -67,18 +67,13 @@ struct LuaTable {
 }
 
 struct LuaFunction {
-  1: IOBuf bytecode,
+  1: IOBufPtr bytecode,
   2: list<LuaPrimitiveObject> upvalues,
 }
 
 struct LuaExternalEnvLocation {
   1: required LuaPrimitiveObject env,  // may not be reference
   2: required LuaPrimitiveObject key,  // may not be reference
-}
-
-struct LuaUserData {
-  1: required string key,
-  2: required IOBuf value,
 }
 
 struct LuaRefObject {
@@ -88,16 +83,12 @@ struct LuaRefObject {
   4: optional Tensor.ThriftTensor tensorVal,
   5: optional Tensor.ThriftStorage storageVal,
   6: optional LuaExternalEnvLocation envLocation,
-  7: optional LuaUserData customUserDataVal,
-  8: optional i64 memRefVal,
 }
-
-typedef list<LuaRefObject> LuaRefList
 
 // A Lua object.
 struct LuaObject {
   1: LuaPrimitiveObject value,
-  2: LuaRefList refs,
+  2: list<LuaRefObject> refs,
 }
 
 struct LuaVersionInfo {
@@ -112,7 +103,6 @@ struct ThriftHeader {
   // 1 = support for metatables, specials
   // 2 = support for chunked encoding
   // 3 = support for external environments
-  // 4 = support for custom userdata
   1: i32 version,
   2: i32 codec,
   3: i64 uncompressedLength,
