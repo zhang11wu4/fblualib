@@ -7,7 +7,7 @@
 #
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
-
+SET(Torch_DIR "/home/baic/torch/install/share/cmake/torch")
 ENABLE_TESTING()
 
 # Torch messes this up

@@ -10,7 +10,7 @@
 
 set -o pipefail
 
-PREFIX=${PREFIX:-"/home/baic/torch/install"}
+PREFIX1=${PREFIX1:-"/home/baic/torch/install"}
 #$PREFIX/bin/luarocks make  
 
 if [[ ! -r ./LuaUtils.h ]]; then
@@ -26,12 +26,13 @@ cd build
 cmake ..
 make
 sudo make install
-
+echo "fblualib build.sh zjg1*************************************************************"
 rocks="util luaunit complex \
   ffivector editline trepl debugger mattorch thrift" # python
 version='0.1-1'
 for rock in $rocks; do
   cd $root/$rock
   # first attempt to install without root. if failed, install with root
-  $PREFIX/bin/luarocks make rockspec/fb$rock-$version.rockspec || sudo $PREFIX/bin/luarocks make rockspec/fb$rock-$version.rockspec
+  $PREFIX1/bin/luarocks make rockspec/fb$rock-$version.rockspec || sudo $PREFIX1/bin/luarocks make rockspec/fb$rock-$version.rockspec
 done
+echo "fblualib build.sh zjg2*************************************************************"
