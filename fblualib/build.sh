@@ -10,6 +10,9 @@
 
 set -o pipefail
 
+PREFIX=${PREFIX:-"/home/baic/torch/install"}
+#$PREFIX/bin/luarocks make  
+
 if [[ ! -r ./LuaUtils.h ]]; then
   echo "Please run from the fblualib subdirectory" >&2
   exit 1
@@ -30,5 +33,5 @@ version='0.1-1'
 for rock in $rocks; do
   cd $root/$rock
   # first attempt to install without root. if failed, install with root
-  luarocks make rockspec/fb$rock-$version.rockspec || sudo luarocks make rockspec/fb$rock-$version.rockspec
+  $PREFIX/bin/luarocks make rockspec/fb$rock-$version.rockspec || sudo $PREFIX/bin/luarocks make rockspec/fb$rock-$version.rockspec
 done
